@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Turnos Hospitalarios</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header>
+        <h1>🏥 Sistema de Administración de Turnos - Hospital</h1>
+        <p>Gestión de filas prioritaria y general (FIFO)</p>
+    </header>
+
+    <main>
+        <section class="panel registro">
+            <h2>Registrar Paciente</h2>
+            <form id="formRegistro">
+                <div class="form-group">
+                    <label for="nombre">Nombre completo</label>
+                    <input type="text" id="nombre" required placeholder="Nombre del paciente">
+                </div>
+                <div class="form-group">
+                    <label for="edad">Edad</label>
+                    <input type="number" id="edad" min="0" max="120" required placeholder="Edad">
+                </div>
+                <div class="form-group">
+                    <label for="motivo">Motivo de consulta</label>
+                    <input type="text" id="motivo" required placeholder="Ej. Dolor de cabeza, revisión, etc.">
+                </div>
+                <div class="form-group">
+                    <label for="urgencia">Clasificación de urgencia</label>
+                    <select id="urgencia" required>
+                        <option value="">Selecciona...</option>
+                        <option value="leve">Leve (Atención general)</option>
+                        <option value="moderada">Moderada (Atención general)</option>
+                        <option value="grave">Grave (Atención prioritaria)</option>
+                        <option value="critica">Crítica (Atención prioritaria)</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="tiempo">Tiempo estimado de atención (minutos)</label>
+                    <input type="number" id="tiempo" min="1" max="120" value="15" required>
+                </div>
+                <button type="submit" class="btn primary">Registrar Paciente</button>
+            </form>
+            <div id="mensajeRegistro" class="mensaje"></div>
+        </section>
+
+        <section class="panel colas">
+            <h2>Filas de Atención</h2>
+            <div class="colas-container">
+                <div class="cola prioritaria">
+                    <h3>🚨 Fila Prioritaria <span id="countPrioritaria" class="badge">0</span></h3>
+                    <ul id="listaPrioritaria" class="lista-pacientes"></ul>
+                </div>
+                <div class="cola general">
+                    <h3>📋 Fila General <span id="countGeneral" class="badge">0</span></h3>
+                    <ul id="listaGeneral" class="lista-pacientes"></ul>
+                </div>
+            </div>
+            <button id="btnAtender" class="btn success">👨‍⚕️ Médico Disponible - Atender Siguiente</button>
+            <div id="mensajeAtencion" class="mensaje"></div>
+        </section>
+
+        <section class="panel estadisticas">
+            <h2>Estadísticas de Atención</h2>
+            <div id="statsGrid" class="stats-grid"></div>
+        </section>
+
+        <section class="panel historial">
+            <h2>Historial de Pacientes Atendidos</h2>
+            <ul id="listaHistorial" class="lista-pacientes"></ul>
+        </section>
+    </main>
+
+    <footer>
+        <p>Sistema de Turnos Hospitalarios • FIFO con prioridad • Proyecto académico</p>
+    </footer>
+
+    <script src="app.js"></script>
+</body>
+</html>
