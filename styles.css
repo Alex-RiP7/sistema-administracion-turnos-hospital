@@ -1,0 +1,210 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, #f5f7fa 0%, #e4e8f0 100%);
+    color: #333;
+    line-height: 1.6;
+    min-height: 100vh;
+}
+
+header {
+    background: linear-gradient(90deg, #1a5f7a, #2e8b57);
+    color: white;
+    padding: 2rem 1rem;
+    text-align: center;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+header h1 {
+    font-size: 1.8rem;
+    margin-bottom: 0.5rem;
+}
+
+main {
+    max-width: 1200px;
+    margin: 2rem auto;
+    padding: 0 1rem;
+    display: grid;
+    gap: 1.5rem;
+}
+
+.panel {
+    background: white;
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+}
+
+.panel h2 {
+    color: #1a5f7a;
+    margin-bottom: 1rem;
+    border-bottom: 2px solid #e0e0e0;
+    padding-bottom: 0.5rem;
+}
+
+.form-group {
+    margin-bottom: 1rem;
+}
+
+.form-group label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 0.3rem;
+    color: #444;
+}
+
+.form-group input,
+.form-group select {
+    width: 100%;
+    padding: 0.7rem;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-size: 1rem;
+}
+
+.form-group input:focus,
+.form-group select:focus {
+    outline: none;
+    border-color: #1a5f7a;
+    box-shadow: 0 0 0 3px rgba(26, 95, 122, 0.1);
+}
+
+.btn {
+    padding: 0.8rem 1.5rem;
+    border: none;
+    border-radius: 6px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn.primary {
+    background: #1a5f7a;
+    color: white;
+    width: 100%;
+}
+
+.btn.primary:hover {
+    background: #154a61;
+}
+
+.btn.success {
+    background: #2e8b57;
+    color: white;
+    margin-top: 1rem;
+    width: 100%;
+    font-size: 1.1rem;
+}
+
+.btn.success:hover {
+    background: #246b45;
+}
+
+.colas-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+}
+
+@media (max-width: 700px) {
+    .colas-container {
+        grid-template-columns: 1fr;
+    }
+}
+
+.cola h3 {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+}
+
+.badge {
+    background: #1a5f7a;
+    color: white;
+    padding: 0.2rem 0.6rem;
+    border-radius: 12px;
+    font-size: 0.85rem;
+}
+
+.lista-pacientes {
+    list-style: none;
+    max-height: 300px;
+    overflow-y: auto;
+    border: 1px solid #eee;
+    border-radius: 6px;
+    padding: 0.5rem;
+}
+
+.lista-pacientes li {
+    background: #f8f9fa;
+    margin-bottom: 0.5rem;
+    padding: 0.8rem;
+    border-radius: 6px;
+    border-left: 4px solid #1a5f7a;
+    font-size: 0.95rem;
+}
+
+.cola.prioritaria .lista-pacientes li {
+    border-left-color: #e74c3c;
+}
+
+.cola.general .lista-pacientes li {
+    border-left-color: #3498db;
+}
+
+.mensaje {
+    margin-top: 1rem;
+    padding: 0.8rem;
+    border-radius: 6px;
+    font-weight: 500;
+}
+
+.mensaje.exito {
+    background: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+}
+
+.mensaje.error {
+    background: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 1rem;
+}
+
+.stat-card {
+    background: #f0f4f8;
+    padding: 1rem;
+    border-radius: 8px;
+    text-align: center;
+}
+
+.stat-card .valor {
+    font-size: 1.8rem;
+    font-weight: bold;
+    color: #1a5f7a;
+}
+
+.stat-card .etiqueta {
+    font-size: 0.9rem;
+    color: #666;
+}
+
+footer {
+    text-align: center;
+    padding: 1.5rem;
+    color: #666;
+    font-size: 0.9rem;
+}
