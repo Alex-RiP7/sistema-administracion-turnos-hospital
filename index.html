@@ -3,79 +3,706 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistema de Turnos Hospitalarios</title>
+    <title>Centro Médico San Rafael | Sistema de Turnos y Consulta Externa</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <header>
-        <h1>🏥 Sistema de Administración de Turnos - Hospital</h1>
-        <p>Gestión de filas prioritaria y general (FIFO)</p>
-    </header>
 
-    <main>
-        <section class="panel registro">
-            <h2>Registrar Paciente</h2>
-            <form id="formRegistro">
-                <div class="form-group">
-                    <label for="nombre">Nombre completo</label>
-                    <input type="text" id="nombre" required placeholder="Nombre del paciente">
+    <!-- BARRA SUPERIOR INSTITUCIONAL -->
+    <header class="hospital-header">
+        <div class="header-container">
+            <div class="hospital-identity">
+                <div class="hospital-crest">
+                    <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M12 6v12m-6-6h12"/>
+                        <circle cx="12" cy="12" r="9"/>
+                    </svg>
                 </div>
-                <div class="form-group">
-                    <label for="edad">Edad</label>
-                    <input type="number" id="edad" min="0" max="120" required placeholder="Edad">
-                </div>
-                <div class="form-group">
-                    <label for="motivo">Motivo de consulta</label>
-                    <input type="text" id="motivo" required placeholder="Ej. Dolor de cabeza, revisión, etc.">
-                </div>
-                <div class="form-group">
-                    <label for="urgencia">Clasificación de urgencia</label>
-                    <select id="urgencia" required>
-                        <option value="">Selecciona...</option>
-                        <option value="leve">Leve (Atención general)</option>
-                        <option value="moderada">Moderada (Atención general)</option>
-                        <option value="grave">Grave (Atención prioritaria)</option>
-                        <option value="critica">Crítica (Atención prioritaria)</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label for="tiempo">Tiempo estimado de atención (minutos)</label>
-                    <input type="number" id="tiempo" min="1" max="120" value="15" required>
-                </div>
-                <button type="submit" class="btn primary">Registrar Paciente</button>
-            </form>
-            <div id="mensajeRegistro" class="mensaje"></div>
-        </section>
-
-        <section class="panel colas">
-            <h2>Filas de Atención</h2>
-            <div class="colas-container">
-                <div class="cola prioritaria">
-                    <h3>🚨 Fila Prioritaria <span id="countPrioritaria" class="badge">0</span></h3>
-                    <ul id="listaPrioritaria" class="lista-pacientes"></ul>
-                </div>
-                <div class="cola general">
-                    <h3>📋 Fila General <span id="countGeneral" class="badge">0</span></h3>
-                    <ul id="listaGeneral" class="lista-pacientes"></ul>
+                <div>
+                    <h1 class="hospital-title">Centro Médico San Rafael</h1>
+                    <span class="hospital-subtitle">Área de Consulta Médica Externa • Módulo de Triaje y Turnos</span>
                 </div>
             </div>
-            <button id="btnAtender" class="btn success">👨‍⚕️ Médico Disponible - Atender Siguiente</button>
-            <div id="mensajeAtencion" class="mensaje"></div>
+
+            <!-- RELOJ CLÍNICO EN VIVO -->
+            <div class="header-center">
+                <div class="live-clock-card">
+                    <span class="clock-label">HORA DEL SISTEMA</span>
+                    <span id="liveClock" class="clock-display">--:--:--</span>
+                    <span id="liveDate" class="date-display">Cargando fecha...</span>
+                </div>
+            </div>
+
+            <!-- CONTROLES Y UTILIDADES -->
+            <div class="header-actions">
+                <button id="btnSoundToggle" class="btn-tool" title="Activar/Silenciar timbre de llamado" aria-label="Sonido">
+                    <svg id="iconSoundOn" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+                        <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
+                        <path d="M15.54 8.46a5 5 0 0 1 0 7.07"/>
+                        <path d="M19.07 4.93a10 10 0 0 1 0 14.14"/>
+                    </svg>
+                    <svg id="iconSoundOff" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" style="display:none;">
+                        <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
+                        <line x1="23" y1="9" x2="17" y2="15"/>
+                        <line x1="17" y1="9" x2="23" y2="15"/>
+                    </svg>
+                    <span id="labelSound">Sonido Activo</span>
+                </button>
+
+                <button id="btnCargarDemo" class="btn-tool btn-demo" title="Cargar 5 pacientes de prueba con prioridades y urgencias">
+                    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                        <circle cx="8.5" cy="7" r="4"/>
+                        <line x1="20" y1="8" x2="20" y2="14"/>
+                        <line x1="23" y1="11" x2="17" y2="11"/>
+                    </svg>
+                    <span>Cargar Casos Demo</span>
+                </button>
+
+                <button id="btnLimpiarDatos" class="btn-tool btn-danger-soft" title="Reiniciar sistema de turnos">
+                    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M3 6h18m-2 0v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                    </svg>
+                </button>
+            </div>
+        </div>
+
+        <!-- BARRA DE PESTAÑAS PRINCIPALES -->
+        <nav class="hospital-nav">
+            <div class="nav-container">
+                <button class="nav-tab active" data-tab="tab-operacion">
+                    <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="3" y="3" width="7" height="7"/>
+                        <rect x="14" y="3" width="7" height="7"/>
+                        <rect x="14" y="14" width="7" height="7"/>
+                        <rect x="3" y="14" width="7" height="7"/>
+                    </svg>
+                    Panel de Consulta y Filas
+                </button>
+                <button class="nav-tab" data-tab="tab-sala">
+                    <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="2" y="3" width="20" height="14" rx="2" ry="2"/>
+                        <line x1="8" y1="21" x2="16" y2="21"/>
+                        <line x1="12" y1="17" x2="12" y2="21"/>
+                    </svg>
+                    Monitor de Sala de Espera (TV)
+                </button>
+                <button class="nav-tab" data-tab="tab-estadisticas">
+                    <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="18" y1="20" x2="18" y2="10"/>
+                        <line x1="12" y1="20" x2="12" y2="4"/>
+                        <line x1="6" y1="20" x2="6" y2="14"/>
+                    </svg>
+                    Estadísticas Clínicas
+                </button>
+                <button class="nav-tab" data-tab="tab-historial">
+                    <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                        <polyline points="14 2 14 8 20 8"/>
+                        <line x1="16" y1="13" x2="8" y2="13"/>
+                        <line x1="16" y1="17" x2="8" y2="17"/>
+                        <polyline points="10 9 9 9 8 9"/>
+                    </svg>
+                    Historial de Consultas (<span id="tabCountHistorial">0</span>)
+                </button>
+            </div>
+        </nav>
+    </header>
+
+    <main class="main-content">
+
+        <!-- ========================================== -->
+        <!-- PESTAÑA 1: PANEL DE CONSULTA Y FILAS       -->
+        <!-- ========================================== -->
+        <section id="tab-operacion" class="tab-view active">
+            
+            <!-- AVISO DE REGLA DEL SISTEMA HOSPITALARIO -->
+            <div class="system-rule-banner">
+                <div class="rule-icon">
+                    <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"/>
+                        <line x1="12" y1="8" x2="12" y2="12"/>
+                        <line x1="12" y1="16" x2="12.01" y2="16"/>
+                    </svg>
+                </div>
+                <div class="rule-text">
+                    <strong>Protocolo de Atención Hospitalaria:</strong>
+                    El médico atiende primero a los pacientes de la <strong>Fila Prioritaria</strong> en estricto orden de llegada (FIFO). Cuando dicha fila se encuentra vacía, atiende al primer paciente de la <strong>Fila General</strong> (FIFO).
+                </div>
+                <div class="rule-indicator">
+                    <span class="live-dot"></span> Regla FIFO activa
+                </div>
+            </div>
+
+            <div class="dashboard-grid">
+
+                <!-- COLUMNA 1: FORMULARIO DE ADMISIÓN Y TRIAJE -->
+                <div class="card admission-card">
+                    <div class="card-header">
+                        <div class="card-title-group">
+                            <span class="badge-module">Admisión</span>
+                            <h2>Registro de Paciente</h2>
+                        </div>
+                        <span class="card-badge-info">Triaje Rápido</span>
+                    </div>
+
+                    <form id="formRegistro" class="admission-form" novalidate>
+                        <!-- Nombre Completo -->
+                        <div class="form-field">
+                            <label for="nombre">Nombre Completo del Paciente <span class="required">*</span></label>
+                            <input type="text" id="nombre" name="nombre" placeholder="Ej. Ana Laura Domínguez" required autocomplete="off">
+                        </div>
+
+                        <!-- Edad y Tiempo Estimado en 2 columnas -->
+                        <div class="form-row-2">
+                            <div class="form-field">
+                                <div class="label-with-badge">
+                                    <label for="edad">Edad <span class="required">*</span></label>
+                                    <span id="edadBadge" class="age-badge" style="display:none;"></span>
+                                </div>
+                                <input type="number" id="edad" name="edad" min="0" max="120" placeholder="Años" required>
+                            </div>
+
+                            <div class="form-field">
+                                <label for="tiempoEstimado">Tiempo Estimado <span class="required">*</span></label>
+                                <div class="time-input-group">
+                                    <input type="number" id="tiempoEstimado" name="tiempoEstimado" min="5" max="120" value="15" required>
+                                    <span class="unit-tag">min</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Motivo de Consulta -->
+                        <div class="form-field">
+                            <label for="motivo">Motivo de Consulta Médica <span class="required">*</span></label>
+                            <input type="text" id="motivo" name="motivo" placeholder="Ej. Dolor abdominal agudo, fiebre alta..." required>
+                            
+                            <!-- Chips rápidos para motivos médicos frecuentes -->
+                            <div class="quick-chips">
+                                <button type="button" class="chip-btn" data-motivo="Fiebre alta y malestar general" data-urgencia="grave">Fiebre alta</button>
+                                <button type="button" class="chip-btn" data-motivo="Dolor torácico / dificultad respiratoria" data-urgencia="critica">Dolor torácico</button>
+                                <button type="button" class="chip-btn" data-motivo="Control rutinario / hipertensión" data-urgencia="leve">Control de rutina</button>
+                                <button type="button" class="chip-btn" data-motivo="Dolor abdominal agudo" data-urgencia="grave">Dolor abdominal</button>
+                                <button type="button" class="chip-btn" data-motivo="Revisión de estudios / receta" data-urgencia="leve">Receta médica</button>
+                            </div>
+                        </div>
+
+                        <!-- Clasificación de Urgencias (Manchester / Estándar Hospitalario) -->
+                        <div class="form-field">
+                            <label for="urgencia">Clasificación de Urgencia (Triaje) <span class="required">*</span></label>
+                            <select id="urgencia" name="urgencia" required>
+                                <option value="" disabled selected>Seleccione nivel clínico...</option>
+                                <option value="critica" data-tipo="prioritaria" data-color="red">Nivel I: Crítica / Emergencia (Riesgo Vital Inmediato)</option>
+                                <option value="grave" data-tipo="prioritaria" data-color="orange">Nivel II: Grave / Muy Urgente (Dolor agudo / Severo)</option>
+                                <option value="moderada" data-tipo="general" data-color="yellow">Nivel III: Moderada / Urgente Relativa</option>
+                                <option value="leve" data-tipo="general" data-color="green">Nivel IV / V: Leve / Consulta Estándar No Urgente</option>
+                            </select>
+                            <p class="field-hint" id="urgenciaHint">El nivel de urgencia asiste en la asignación recomendada de fila.</p>
+                        </div>
+
+                        <!-- Tipo de Atención (Prioritaria vs General) -->
+                        <div class="form-field">
+                            <label>Tipo de Fila / Atención Asignada <span class="required">*</span></label>
+                            <div class="segment-selector" role="radiogroup" aria-label="Tipo de atención">
+                                <label class="segment-option" id="optPrioritariaLabel">
+                                    <input type="radio" name="tipoAtencion" id="tipoPrioritaria" value="prioritaria">
+                                    <span class="segment-box prioritaria-box">
+                                        <span class="segment-icon">
+                                            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5">
+                                                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+                                            </svg>
+                                        </span>
+                                        <span class="segment-text">
+                                            <strong>Fila Prioritaria</strong>
+                                            <small>Emergencias, adultos mayores, niños, embarazo</small>
+                                        </span>
+                                    </span>
+                                </label>
+
+                                <label class="segment-option" id="optGeneralLabel">
+                                    <input type="radio" name="tipoAtencion" id="tipoGeneral" value="general" checked>
+                                    <span class="segment-box general-box">
+                                        <span class="segment-icon">
+                                            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5">
+                                                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                                                <circle cx="9" cy="7" r="4"/>
+                                            </svg>
+                                        </span>
+                                        <span class="segment-text">
+                                            <strong>Fila General</strong>
+                                            <small>Consulta médica ordinaria por orden de llegada</small>
+                                        </span>
+                                    </span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn-primary-action" id="btnRegistrar">
+                            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                                <circle cx="8.5" cy="7" r="4"/>
+                                <line x1="20" y1="8" x2="20" y2="14"/>
+                                <line x1="23" y1="11" x2="17" y2="11"/>
+                            </svg>
+                            Registrar Paciente y Generar Turno
+                        </button>
+                    </form>
+                </div>
+
+                <!-- COLUMNA 2: ESTACIÓN MÉDICA Y CONTROL DE CONSULTA -->
+                <div class="card doctor-card">
+                    <div class="card-header">
+                        <div class="card-title-group">
+                            <span class="badge-module module-doctor">Consultorio 1</span>
+                            <h2>Estación de Atención Médica</h2>
+                        </div>
+                        <div id="doctorStatusPill" class="status-pill status-available">
+                            <span class="pill-dot"></span>
+                            <span id="doctorStatusText">Médico Disponible</span>
+                        </div>
+                    </div>
+
+                    <!-- ESTADO A: PACIENTE ACTUALMENTE EN CONSULTA -->
+                    <div id="panelEnConsulta" class="current-consult-panel" style="display:none;">
+                        <div class="active-badge">CONSULTA EN CURSO</div>
+                        
+                        <div class="consult-meta-main">
+                            <div class="turn-highlight" id="activeTurnoCode">P-001</div>
+                            <div class="patient-highlight">
+                                <h3 id="activeNombre">Nombre del Paciente</h3>
+                                <p id="activeDetails">Edad: 00 años • Motivo: --</p>
+                            </div>
+                        </div>
+
+                        <div class="consult-timer-bar">
+                            <div class="timer-stat">
+                                <span class="timer-label">Tiempo transcurrido</span>
+                                <span class="timer-clock" id="consultTimer">00:00</span>
+                            </div>
+                            <div class="timer-stat">
+                                <span class="timer-label">Tiempo estimado</span>
+                                <span class="timer-val" id="consultEstimado">-- min</span>
+                            </div>
+                            <div class="timer-stat">
+                                <span class="timer-label">Tipo de atención</span>
+                                <span class="queue-tag" id="activeTipoBadge">--</span>
+                            </div>
+                        </div>
+
+                        <div class="consult-actions">
+                            <button id="btnFinalizarConsulta" class="btn-finish-consult">
+                                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5">
+                                    <polyline points="20 6 9 17 4 12"/>
+                                </svg>
+                                Completar Consulta (Dar de Alta)
+                            </button>
+                            <button id="btnCancelarConsulta" class="btn-cancel-consult" title="Cancelar si el paciente no acudió o hubo interrupción">
+                                Cancelar / Ausente
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- ESTADO B: MÉDICO DISPONIBLE / ESPERANDO LLAMAR -->
+                    <div id="panelMedicoLibre" class="doctor-available-panel">
+                        <div class="available-graphic">
+                            <div class="steth-icon">
+                                <svg viewBox="0 0 24 24" width="36" height="36" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M4.5 3v5a4.5 4.5 0 0 0 9 0V3"/>
+                                    <path d="M9 12.5v3a4.5 4.5 0 0 0 9 0v-1"/>
+                                    <circle cx="18" cy="11.5" r="2.5"/>
+                                </svg>
+                            </div>
+                            <h3>El consultorio se encuentra libre</h3>
+                            <p>Presione el botón para llamar al siguiente paciente respetando la regla hospitalaria.</p>
+                        </div>
+
+                        <!-- INDICADOR PREDICTIVO DEL SIGUIENTE PACIENTE SEGÚN REGLA FIFO Y PRIORIDAD -->
+                        <div class="next-candidate-card" id="nextCandidateCard">
+                            <div class="candidate-header">
+                                <span class="candidate-tag">SIGUIENTE EN FILA:</span>
+                                <span id="candidateQueueType" class="candidate-queue">--</span>
+                            </div>
+                            <div class="candidate-body" id="candidateBody">
+                                <span class="candidate-name">Calculando próximo paciente...</span>
+                            </div>
+                        </div>
+
+                        <button id="btnAtenderSiguiente" class="btn-call-patient">
+                            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+                                <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
+                                <path d="M15.54 8.46a5 5 0 0 1 0 7.07"/>
+                                <path d="M19.07 4.93a10 10 0 0 1 0 14.14"/>
+                            </svg>
+                            Llamar Siguiente Paciente a Consulta
+                        </button>
+                    </div>
+
+                    <!-- RESUMEN EN VIVO DE ATENCIÓN HOY -->
+                    <div class="mini-stats-tray">
+                        <div class="tray-item">
+                            <span class="tray-label">En espera ahora</span>
+                            <strong class="tray-value" id="trayEnEspera">0</strong>
+                        </div>
+                        <div class="tray-item">
+                            <span class="tray-label">Atendidos hoy</span>
+                            <strong class="tray-value" id="trayAtendidos">0</strong>
+                        </div>
+                        <div class="tray-item">
+                            <span class="tray-label">Espera estimada</span>
+                            <strong class="tray-value" id="trayTiempoEspera">0 min</strong>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- COLUMNA 3: LAS DOS FILAS DE ATENCIÓN (FIFO) -->
+                <div class="card queues-card">
+                    <div class="card-header">
+                        <div class="card-title-group">
+                            <span class="badge-module module-queue">Monitoreo</span>
+                            <h2>Filas de Espera en Consulta</h2>
+                        </div>
+                    </div>
+
+                    <div class="queues-split-view">
+                        
+                        <!-- FILA 1: PRIORITARIA -->
+                        <div class="queue-column priority-queue-col">
+                            <div class="queue-col-header priority-head">
+                                <div class="queue-title-wrap">
+                                    <span class="queue-accent-dot priority-dot"></span>
+                                    <div>
+                                        <h3>Fila Prioritaria</h3>
+                                        <small class="queue-subtext">Precedencia Absoluta (FIFO)</small>
+                                    </div>
+                                </div>
+                                <span class="count-badge priority-count" id="countPrioritaria">0</span>
+                            </div>
+
+                            <div class="queue-list-container" id="containerPrioritaria">
+                                <ul id="listaPrioritaria" class="patients-queue-list">
+                                    <!-- Generado dinámicamente -->
+                                </ul>
+                            </div>
+                        </div>
+
+                        <!-- FILA 2: GENERAL -->
+                        <div class="queue-column general-queue-col">
+                            <div class="queue-col-header general-head">
+                                <div class="queue-title-wrap">
+                                    <span class="queue-accent-dot general-dot"></span>
+                                    <div>
+                                        <h3>Fila General</h3>
+                                        <small class="queue-subtext">Orden de Llegada (FIFO)</small>
+                                    </div>
+                                </div>
+                                <span class="count-badge general-count" id="countGeneral">0</span>
+                            </div>
+
+                            <div class="queue-list-container" id="containerGeneral">
+                                <ul id="listaGeneral" class="patients-queue-list">
+                                    <!-- Generado dinámicamente -->
+                                </ul>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
         </section>
 
-        <section class="panel estadisticas">
-            <h2>Estadísticas de Atención</h2>
-            <div id="statsGrid" class="stats-grid"></div>
+        <!-- ========================================== -->
+        <!-- PESTAÑA 2: MONITOR DE SALA DE ESPERA (TV)  -->
+        <!-- ========================================== -->
+        <section id="tab-sala" class="tab-view">
+            <div class="waiting-room-screen">
+                <div class="tv-header">
+                    <div class="tv-hospital-brand">
+                        <span class="tv-brand-tag">PANTALLA DE SALA DE ESPERA</span>
+                        <h2>Llamado Oficial de Consulta Externa</h2>
+                    </div>
+                    <div class="tv-clock" id="tvClock">--:--:--</div>
+                </div>
+
+                <div class="tv-body">
+                    <!-- Gran pantalla central del turno llamado -->
+                    <div class="tv-called-display">
+                        <span class="tv-label">PACIENTE LLAMADO A CONSULTORIO 1</span>
+                        
+                        <div class="tv-turn-code" id="tvTurnoCode">--</div>
+                        <div class="tv-patient-name" id="tvPatientName">Ningún paciente en consulta activa</div>
+                        <div class="tv-consult-details" id="tvConsultDetails">Favor de esperar su turno en la sala de atención</div>
+
+                        <div class="tv-chime-indicator">
+                            <span class="pulse-beacon"></span> Atento a la llamada del personal de enfermería
+                        </div>
+                    </div>
+
+                    <!-- Panel lateral de próximos en fila -->
+                    <div class="tv-upcoming-panel">
+                        <div class="tv-upcoming-block">
+                            <h4 class="tv-up-title priority-accent">Próximos Fila Prioritaria</h4>
+                            <ul id="tvListaPrioritaria" class="tv-upcoming-list"></ul>
+                        </div>
+
+                        <div class="tv-upcoming-block">
+                            <h4 class="tv-up-title general-accent">Próximos Fila General</h4>
+                            <ul id="tvListaGeneral" class="tv-upcoming-list"></ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </section>
 
-        <section class="panel historial">
-            <h2>Historial de Pacientes Atendidos</h2>
-            <ul id="listaHistorial" class="lista-pacientes"></ul>
+        <!-- ========================================== -->
+        <!-- PESTAÑA 3: ESTADÍSTICAS CLÍNICAS           -->
+        <!-- ========================================== -->
+        <section id="tab-estadisticas" class="tab-view">
+            <div class="stats-overview-layout">
+                <div class="section-heading">
+                    <div>
+                        <h2>Métricas y Estadísticas de Atención</h2>
+                        <p>Supervisión de tiempos de espera, clasificación de triaje y flujo de consulta médica.</p>
+                    </div>
+                    <button id="btnExportStats" class="btn-outline-action">
+                        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                            <polyline points="7 10 12 15 17 10"/>
+                            <line x1="12" y1="15" x2="12" y2="3"/>
+                        </svg>
+                        Descargar Resumen (JSON)
+                    </button>
+                </div>
+
+                <!-- TARJETAS DE INDICADORES PRINCIPALES (KPIS) -->
+                <div class="kpi-grid">
+                    <div class="kpi-card">
+                        <div class="kpi-icon icon-blue">
+                            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                                <circle cx="9" cy="7" r="4"/>
+                            </svg>
+                        </div>
+                        <div class="kpi-content">
+                            <span class="kpi-title">Pacientes Registrados</span>
+                            <span class="kpi-number" id="statTotalRegistrados">0</span>
+                            <span class="kpi-sub">Total histórico hoy</span>
+                        </div>
+                    </div>
+
+                    <div class="kpi-card">
+                        <div class="kpi-icon icon-green">
+                            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                                <polyline points="22 4 12 14.01 9 11.01"/>
+                            </svg>
+                        </div>
+                        <div class="kpi-content">
+                            <span class="kpi-title">Consultas Concluidas</span>
+                            <span class="kpi-number" id="statTotalAtendidos">0</span>
+                            <span class="kpi-sub" id="statTasaAtencion">0% de demanda</span>
+                        </div>
+                    </div>
+
+                    <div class="kpi-card">
+                        <div class="kpi-icon icon-orange">
+                            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="12" cy="12" r="10"/>
+                                <polyline points="12 6 12 12 16 14"/>
+                            </svg>
+                        </div>
+                        <div class="kpi-content">
+                            <span class="kpi-title">En Sala de Espera</span>
+                            <span class="kpi-number" id="statEnEspera">0</span>
+                            <span class="kpi-sub" id="statDesgloseEspera">0 Prioritarios • 0 Generales</span>
+                        </div>
+                    </div>
+
+                    <div class="kpi-card">
+                        <div class="kpi-icon icon-purple">
+                            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2">
+                                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                                <line x1="16" y1="2" x2="16" y2="6"/>
+                                <line x1="8" y1="2" x2="8" y2="6"/>
+                                <line x1="3" y1="10" x2="21" y2="10"/>
+                            </svg>
+                        </div>
+                        <div class="kpi-content">
+                            <span class="kpi-title">Tiempo Promedio Consulta</span>
+                            <span class="kpi-number" id="statPromedioTiempo">0 <small style="font-size:1rem;">min</small></span>
+                            <span class="kpi-sub" id="statTiempoAcumulado">Acumulado: 0 min</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- DESGLOSES GRÁFICOS DE TRIAJE Y COLAS -->
+                <div class="charts-row">
+                    <!-- Distribución por Clasificación de Urgencia -->
+                    <div class="card chart-card">
+                        <div class="card-header">
+                            <h3>Distribución por Nivel de Urgencia (Triaje)</h3>
+                            <small class="text-muted">Protocolo de Clasificación</small>
+                        </div>
+                        <div class="triage-distribution-list" id="triageBarsList">
+                            <!-- Inyectado por JS -->
+                        </div>
+                    </div>
+
+                    <!-- Distribución por Tipo de Fila -->
+                    <div class="card chart-card">
+                        <div class="card-header">
+                            <h3>Proporción de Filas de Atención</h3>
+                            <small class="text-muted">Prioritaria vs General</small>
+                        </div>
+                        <div class="queue-ratio-container">
+                            <div class="ratio-progress-bar">
+                                <div id="ratioBarPrioritaria" class="bar-segment bar-prioritaria" style="width: 50%;"></div>
+                                <div id="ratioBarGeneral" class="bar-segment bar-general" style="width: 50%;"></div>
+                            </div>
+                            <div class="ratio-legends">
+                                <div class="legend-item">
+                                    <span class="legend-color priority-bg"></span>
+                                    <span>Prioritaria: <strong id="statPrioCount">0</strong> (<span id="statPrioPct">0%</span>)</span>
+                                </div>
+                                <div class="legend-item">
+                                    <span class="legend-color general-bg"></span>
+                                    <span>General: <strong id="statGenCount">0</strong> (<span id="statGenPct">0%</span>)</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </section>
+
+        <!-- ========================================== -->
+        <!-- PESTAÑA 4: HISTORIAL DE PACIENTES          -->
+        <!-- ========================================== -->
+        <section id="tab-historial" class="tab-view">
+            <div class="history-layout">
+                <div class="section-heading">
+                    <div>
+                        <h2>Registro Histórico de Consultas Médicas</h2>
+                        <p>Auditoría clínica con registro de horas de ingreso, turno, motivo y tiempos de consulta.</p>
+                    </div>
+                    <div class="history-filters">
+                        <input type="text" id="filtroHistorial" placeholder="Buscar por paciente, turno o motivo..." class="filter-input">
+                    </div>
+                </div>
+
+                <div class="card table-card">
+                    <div class="table-responsive">
+                        <table class="clinical-table">
+                            <thead>
+                                <tr>
+                                    <th>Turno</th>
+                                    <th>Paciente</th>
+                                    <th>Edad</th>
+                                    <th>Clasificación Triaje</th>
+                                    <th>Fila</th>
+                                    <th>Motivo Clínico</th>
+                                    <th>Hora Llegada</th>
+                                    <th>Hora Atención</th>
+                                    <th>Tiempo Consulta</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tablaHistorialBody">
+                                <!-- Inyectado dinámicamente -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </section>
+
     </main>
 
-    <footer>
-        <p>Sistema de Turnos Hospitalarios • FIFO con prioridad • Proyecto académico</p>
+    <!-- ========================================== -->
+    <!-- MODAL: COMPROBANTE DE TURNO (TICKET)       -->
+    <!-- ========================================== -->
+    <div id="modalTicket" class="modal-backdrop" style="display: none;">
+        <div class="ticket-dialog" role="dialog" aria-modal="true">
+            <div class="ticket-paper" id="ticketPaper">
+                <div class="ticket-header">
+                    <div class="ticket-logo">
+                        <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2.5">
+                            <path d="M12 6v12m-6-6h12"/>
+                            <circle cx="12" cy="12" r="9"/>
+                        </svg>
+                    </div>
+                    <h4>Centro Médico San Rafael</h4>
+                    <p>Unidad de Consulta Externa & Triaje</p>
+                    <div class="ticket-cut-line"></div>
+                </div>
+
+                <div class="ticket-turn-display">
+                    <span class="ticket-tag">SU NÚMERO DE TURNO</span>
+                    <div class="ticket-big-number" id="ticketNumero">P-001</div>
+                    <span class="ticket-queue-badge" id="ticketTipoBadge">Fila Prioritaria</span>
+                </div>
+
+                <div class="ticket-details-table">
+                    <div class="ticket-row">
+                        <span>Paciente:</span>
+                        <strong id="ticketNombre">Nombre</strong>
+                    </div>
+                    <div class="ticket-row">
+                        <span>Edad:</span>
+                        <span id="ticketEdad">00 años</span>
+                    </div>
+                    <div class="ticket-row">
+                        <span>Motivo:</span>
+                        <span id="ticketMotivo">Motivo</span>
+                    </div>
+                    <div class="ticket-row">
+                        <span>Urgencia:</span>
+                        <strong id="ticketUrgencia">Urgente</strong>
+                    </div>
+                    <div class="ticket-row">
+                        <span>Pacientes antes de usted:</span>
+                        <strong id="ticketPosicion">0</strong>
+                    </div>
+                    <div class="ticket-row">
+                        <span>Espera aprox:</span>
+                        <strong id="ticketEspera">~15 min</strong>
+                    </div>
+                    <div class="ticket-row">
+                        <span>Emisión:</span>
+                        <span id="ticketFechaHora">04/11/2026 00:00</span>
+                    </div>
+                </div>
+
+                <div class="ticket-footer-instructions">
+                    <p>Favor de tomar asiento en la sala de espera y permanecer atento a la pantalla y al timbre sonoro.</p>
+                </div>
+            </div>
+
+            <div class="ticket-modal-actions">
+                <button id="btnPrintTicket" class="btn-print">
+                    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="6 9 6 2 18 2 18 9"/>
+                        <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/>
+                        <rect x="6" y="14" width="12" height="8"/>
+                    </svg>
+                    Imprimir Comprobante
+                </button>
+                <button id="btnCloseTicket" class="btn-close-modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- NOTIFICACIONES TOAST FLOTANTES -->
+    <div id="toastContainer" class="toast-container"></div>
+
+    <!-- PIE INSTITUCIONAL -->
+    <footer class="hospital-footer">
+        <div class="footer-container">
+            <p><strong>Centro Médico San Rafael</strong> • Sistema de Gestión de Turnos y Filas de Consulta Externa (FIFO con Prioridad Médica)</p>
+            <p class="footer-sub">Cumplimiento de estándares de clasificación clínica de urgencias y tiempos de espera de atención.</p>
+        </div>
     </footer>
 
     <script src="app.js"></script>
